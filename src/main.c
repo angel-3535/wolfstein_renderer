@@ -1,120 +1,71 @@
 
-#include "map.h"
+#include "globals.h"
+#include "types.h"
 #include <math.h>
 #include <raylib.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(int argc, char *argv[]) {
+typedef struct {
+  vec2 position;
+  vec2 direction;
+  vec2 camera_plane;
+  f64 move_speed;
+  f64 rot_speed;
+} Player;
+
+typedef struct {
+  i32 hit;
+  i32 side;
+  f64 perp_wall_dist;
+  Color color;
+} HitInfo;
+
+typedef struct {
+  vec2 origin;
+  vec2 direction;
+  HitInfo hit_info;
+} RayCast;
+
+void Cast_Ray(RayCast *ray, Player *player);
+void Draw_RayHit(RayCast *ray, f64 camera_x);
+void _process_input(f64 delta_time);
+
+Player player = {
+    .position = {22.0, 12.0},
+    .direction = {-1.0, 0.0},
+    .camera_plane = {0.0, 0.66},
+    .move_speed = 5.0,
+    .rot_speed = 3.0,
+};
+
+i32 main(i32 argc, char *argv[]) {
   InitWindow(screen_width, screen_height, "Wolf3d");
 
-  const Vector2 player_pos = {22.0f, 12.0f};
-  const Vector2 player_dir = {-1.0f, 0.0f};
-  const Vector2 camera_plane = {0.0f, 0.66f};
-
   while (!WindowShouldClose()) {
-    const float delta_time = GetFrameTime();
-    const int fps = GetFPS();
+    const f32 delta_time = GetFrameTime();
+    const i32 fps = GetFPS();
+
+    _process_input(delta_time);
+
     BeginDrawing();
     ClearBackground(BLACK);
 
-    for (int pos_x = 0; pos_x < screen_width; pos_x++) {
-      double camera_x = 2 * pos_x / (double)screen_width - 1;
-      Vector2 ray_dir = {player_dir.x + camera_plane.x * camera_x,
-                         player_dir.y + camera_plane.y * camera_x};
-      int map_x = (int)player_pos.x;
-      int map_y = (int)player_pos.y;
+    for (i32 pos_x = 0; pos_x < screen_width; pos_x++) {
+      f64 camera_x = 2 * pos_x / (f64)screen_width - 1;
 
-      double side_dist_x;
-      double side_dist_y;
+      RayCast ray = {};
+      ray.direction =
+          (vec2){player.direction.x + player.camera_plane.x * camera_x,
+                 player.direction.y + player.camera_plane.y * camera_x};
 
-      Vector2 delta_dist = {(ray_dir.x == 0) ? 1e30 : fabs(1 / ray_dir.x),
-                            (ray_dir.y == 0) ? 1e30 : fabs(1 / ray_dir.y)};
-      double perp_wall_dist;
+      ray.origin.x = player.position.x;
+      ray.origin.y = player.position.y;
 
-      int step_x;
-      int step_y;
-
-      int hit = 0;
-      int side;
-
-      if (ray_dir.x < 0) {
-        step_x = -1;
-        side_dist_x = (player_pos.x - map_x) * delta_dist.x;
-      } else {
-        step_x = 1;
-        side_dist_x = (map_x + 1.0 - player_pos.x) * delta_dist.x;
-      }
-      if (ray_dir.y < 0) {
-        step_y = -1;
-        side_dist_y = (player_pos.y - map_y) * delta_dist.y;
-      } else {
-        step_y = 1;
-        side_dist_y = (map_y + 1.0 - player_pos.y) * delta_dist.y;
-      }
-
-      while (hit == 0) {
-        if (side_dist_x < side_dist_y) {
-          side_dist_x += delta_dist.x;
-          map_x += step_x;
-          side = 0;
-        } else {
-          side_dist_y += delta_dist.y;
-          map_y += step_y;
-          side = 1;
-        }
-
-        if (worldMap[map_x][map_y] > 0)
-          hit = 1;
-      }
-
-      if (side == 0)
-        perp_wall_dist = (map_x - player_pos.x + (1 - step_x) / 2) / ray_dir.x;
-      else
-        perp_wall_dist = (map_y - player_pos.y + (1 - step_y) / 2) / ray_dir.y;
-
-      int line_height = (int)(screen_height / perp_wall_dist);
-
-      int draw_start = -line_height / 2 + screen_height / 2;
-      if (draw_start < 0)
-        draw_start = 0;
-
-      int draw_end = line_height / 2 + screen_height / 2;
-
-      if (draw_end >= screen_height)
-        draw_end = screen_height - 1;
-
-      Color color;
-      switch (worldMap[map_x][map_y]) {
-      case 1:
-        if (side == 1)
-          color = (Color){255, 0, 0, 255};
-        break;
-      case 2:
-        if (side == 2)
-          color = (Color){0, 255, 0, 255};
-        break;
-      case 3:
-        if (side == 3)
-          color = (Color){0, 0, 255, 255};
-        break;
-      case 4:
-        if (side == 4)
-          color = (Color){255, 255, 255, 255};
-        break;
-      default:
-        color = (Color){255, 255, 0, 255};
-        break;
-      }
-      if (side == 1) {
-        color.r = color.r / 2;
-        color.g = color.g / 2;
-        color.b = color.b / 2;
-      }
-
-      DrawLine(pos_x, draw_start, pos_x, draw_end, color);
-      DrawText(TextFormat("FPS: %d", fps), 10, 10, 12, GREEN);
+      Cast_Ray(&ray, &player);
+      Draw_RayHit(&ray, camera_x);
     }
+    DrawText(TextFormat("FPS: %d", fps), 10, 10, 12, GREEN);
 
     EndDrawing();
   }
@@ -122,4 +73,139 @@ int main(int argc, char *argv[]) {
   CloseWindow();
 
   return 0;
+}
+
+void _process_input(f64 delta_time) {
+  if (IsKeyDown(KEY_W)) {
+    f32 velocity = player.move_speed * delta_time;
+
+    i32 pos_x = (player.position.x + (player.direction.x * velocity));
+    i32 pos_y = (player.position.y + (player.direction.y * velocity));
+
+    if (worldMap[(i32)player.position.x][pos_y] == false) {
+      player.position.y += player.direction.y * velocity;
+    }
+    if (worldMap[pos_x][(i32)player.position.y] == false) {
+      player.position.x += player.direction.x * velocity;
+    }
+  }
+
+  if (IsKeyDown(KEY_S)) {
+    f32 velocity = player.move_speed * delta_time;
+
+    i32 pos_x = (player.position.x - (player.direction.x * velocity));
+    i32 pos_y = (player.position.y - (player.direction.y * velocity));
+
+    if (worldMap[(i32)player.position.x][pos_y] == false) {
+      player.position.y -= player.direction.y * velocity;
+    }
+    if (worldMap[pos_x][(i32)player.position.y] == false) {
+      player.position.x -= player.direction.x * velocity;
+    }
+  }
+  // Rotate right
+  if (IsKeyDown(KEY_A)) {
+    f32 old_dir_x = player.direction.x;
+    player.direction.x =
+        player.direction.x * cos(player.rot_speed * delta_time) -
+        player.direction.y * sin(player.rot_speed * delta_time);
+
+    player.direction.y =
+        old_dir_x * sin(player.rot_speed * delta_time) +
+        player.direction.y * cos(player.rot_speed * delta_time);
+    f32 old_plane_x = player.camera_plane.x;
+    player.camera_plane.x =
+        player.camera_plane.x * cos(player.rot_speed * delta_time) -
+        player.camera_plane.y * sin(player.rot_speed * delta_time);
+    player.camera_plane.y =
+        old_plane_x * sin(player.rot_speed * delta_time) +
+        player.camera_plane.y * cos(player.rot_speed * delta_time);
+  }
+
+  // Rotate left
+  if (IsKeyDown(KEY_D)) {
+    f32 old_dir_x = player.direction.x;
+    player.direction.x =
+        player.direction.x * cos(-player.rot_speed * delta_time) -
+        player.direction.y * sin(-player.rot_speed * delta_time);
+
+    player.direction.y =
+        old_dir_x * sin(-player.rot_speed * delta_time) +
+        player.direction.y * cos(-player.rot_speed * delta_time);
+    f32 old_plane_x = player.camera_plane.x;
+    player.camera_plane.x =
+        player.camera_plane.x * cos(-player.rot_speed * delta_time) -
+        player.camera_plane.y * sin(-player.rot_speed * delta_time);
+    player.camera_plane.y =
+        old_plane_x * sin(-player.rot_speed * delta_time) +
+        player.camera_plane.y * cos(-player.rot_speed * delta_time);
+  }
+}
+
+void Cast_Ray(RayCast *ray, Player *player) {
+  ivec2 map = {(i32)ray->origin.x, (i32)ray->origin.y};
+  vec2 side_dist;
+  vec2 delta_dist = {
+      (ray->direction.x == 0) ? 1e30 : fabs(1 / ray->direction.x),
+      (ray->direction.y == 0) ? 1e30 : fabs(1 / ray->direction.y)};
+
+  ivec2 step;
+
+  if (ray->direction.x < 0) {
+    step.x = -1;
+    side_dist.x = (ray->origin.x - map.x) * delta_dist.x;
+  } else {
+    step.x = 1;
+    side_dist.x = (map.x + 1.0 - ray->origin.x) * delta_dist.x;
+  }
+  if (ray->direction.y < 0) {
+    step.y = -1;
+    side_dist.y = (ray->origin.y - map.y) * delta_dist.y;
+  } else {
+    step.y = 1;
+    side_dist.y = (map.y + 1.0 - ray->origin.y) * delta_dist.y;
+  }
+
+  while (ray->hit_info.hit == 0) {
+    if (side_dist.x < side_dist.y) {
+      side_dist.x += delta_dist.x;
+      map.x += step.x;
+      ray->hit_info.side = 0;
+    } else {
+      side_dist.y += delta_dist.y;
+      map.y += step.y;
+      ray->hit_info.side = 1;
+    }
+
+    if (worldMap[(i32)map.x][(i32)map.y] > 0)
+      ray->hit_info.hit = 1;
+  }
+
+  if (ray->hit_info.side == 0) {
+    ray->hit_info.perp_wall_dist =
+        (map.x - player->position.x + (1 - step.x) / 2) / ray->direction.x;
+  }
+
+  else {
+    ray->hit_info.perp_wall_dist =
+        (map.y - player->position.y + (1 - step.y) / 2) / ray->direction.y;
+  }
+
+  ray->hit_info.color =
+      Get_Wall_Color(worldMap[(i32)map.x][(i32)map.y], ray->hit_info.side);
+}
+
+void Draw_RayHit(RayCast *ray, f64 camera_x) {
+  if (ray->hit_info.hit == 0)
+    return;
+  i32 line_height = (i32)(screen_height / ray->hit_info.perp_wall_dist);
+  i32 draw_start = -line_height / 2 + screen_height / 2;
+  if (draw_start < 0)
+    draw_start = 0;
+  i32 draw_end = line_height / 2 + screen_height / 2;
+  if (draw_end >= screen_height)
+    draw_end = screen_height - 1;
+  DrawLineV((vec2f){(f32)((camera_x + 1) * screen_width / 2), (f32)draw_start},
+            (vec2f){(f32)((camera_x + 1) * screen_width / 2), (f32)draw_end},
+            ray->hit_info.color);
 }

@@ -1,9 +1,11 @@
 #pragma once
 
+#include <raylib.h>
+#include <stdio.h>
 const int map_width = 24;
 const int map_height = 24;
-const int screen_width = 640;
-const int screen_height = 480;
+const int screen_width = 1280;
+const int screen_height = 720;
 
 int worldMap[map_width][map_height] = {
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -30,3 +32,31 @@ int worldMap[map_width][map_height] = {
     {1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
     {1, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}};
+
+Color Get_Wall_Color(int wall_type, int side) {
+  Color color;
+  switch (wall_type) {
+  case 1:
+    color = (Color){255, 0, 0, 255};
+    break;
+  case 2:
+    color = (Color){0, 255, 0, 255};
+    break;
+  case 3:
+    color = (Color){0, 0, 255, 255};
+    break;
+  case 4:
+    color = (Color){255, 255, 255, 255};
+    break;
+  default:
+    color = (Color){255, 255, 0, 255};
+    break;
+  }
+  if (side == 1) {
+    color.r = color.r / 2;
+    color.g = color.g / 2;
+    color.b = color.b / 2;
+  }
+
+  return color;
+}
