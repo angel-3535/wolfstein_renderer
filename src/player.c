@@ -2,8 +2,12 @@
 #include "world/world.h"
 #include <math.h>
 
-void Move_Player(Vector2 direction, f64 delta_time) {
+void Move_Player(Vector2 move_vector, f64 delta_time) {
   f32 velocity = player.move_speed * delta_time;
+  vec2 direction = {
+      player.direction.x * move_vector.x - player.direction.y * move_vector.y,
+      player.direction.y * move_vector.x + player.direction.x * move_vector.y,
+  };
 
   i32 pos_x = (player.position.x + (direction.x * velocity));
   i32 pos_y = (player.position.y + (direction.y * velocity));

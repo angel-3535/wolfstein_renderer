@@ -1,6 +1,7 @@
 #include "gfx/renderer.h"
 #include "types.h"
 #include <raylib.h>
+#include <raymath.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -55,17 +56,23 @@ void _process_input(f64 delta_time) {
   if (IsKeyDown(KEY_W)) {
     move_direction.x = 1;
   }
-
   if (IsKeyDown(KEY_S)) {
     move_direction.x = -1;
   }
-  // Rotate right
   if (IsKeyDown(KEY_A)) {
+    move_direction.y = 1;
+  }
+  if (IsKeyDown(KEY_D)) {
+    move_direction.y = -1;
+  }
+  if (IsKeyDown(KEY_Q) || IsKeyDown(KEY_LEFT)) {
     Rotate_Player(1, delta_time);
   }
-  // Rotate left
-  if (IsKeyDown(KEY_D)) {
+  if (IsKeyDown(KEY_E) || IsKeyDown(KEY_RIGHT)) {
     Rotate_Player(-1, delta_time);
   }
+
+  move_direction = Vector2Normalize(move_direction);
+
   Move_Player(move_direction, delta_time);
 }
