@@ -1,4 +1,5 @@
-#pragma once
+#ifndef TYPES_H
+#define TYPES_H
 
 #include <raylib.h>
 typedef int i32;
@@ -16,3 +17,5 @@ typedef struct {
   i32 x;
   i32 y;
 } ivec2;
+
+#endif // INCLUDE/Users/angel/dev/personal/wolf3d/srctypestypes.h_

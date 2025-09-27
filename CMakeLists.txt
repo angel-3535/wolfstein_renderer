@@ -7,7 +7,9 @@ set(CMAKE_C_STANDARD 11) # Requires C11 standard
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 
-add_executable(${PROJECT_NAME} src/main.c)
+
+list(APPEND src_files src/main.c src/player.c src/gfx/renderer.c src/world/world.c)
+add_executable(${PROJECT_NAME} ${src_files})
 
 target_link_libraries(${PROJECT_NAME} raylib)
 
