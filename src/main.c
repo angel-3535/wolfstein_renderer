@@ -66,10 +66,10 @@ void _process_input(f64 delta_time) {
     move_direction.y = -1;
   }
   if (IsKeyDown(KEY_Q) || IsKeyDown(KEY_LEFT)) {
-    Rotate_Player(1, delta_time);
+    Rotate_Player(player.rot_speed, delta_time);
   }
   if (IsKeyDown(KEY_E) || IsKeyDown(KEY_RIGHT)) {
-    Rotate_Player(-1, delta_time);
+    Rotate_Player(-player.rot_speed, delta_time);
   }
 
   move_direction = Vector2Normalize(move_direction);

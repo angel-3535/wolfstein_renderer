@@ -1,5 +1,5 @@
 #include "player.h"
-#include "world/world.h"
+#include "../world/world.h"
 #include <math.h>
 
 void Move_Player(Vector2 move_vector, f64 delta_time) {

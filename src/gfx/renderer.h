@@ -1,12 +1,14 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include "../globals.h"
-#include "../player.h"
 #include "../types.h"
 #include "../world/world.h"
+#include <entity/player.h>
 #include <math.h>
 #include <raylib.h>
+
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 600
 
 typedef struct {
   i32 hit;

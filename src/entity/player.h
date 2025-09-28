@@ -1,7 +1,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include "types.h"
+#include "../types.h"
 #include <raylib.h>
 
 typedef struct {
