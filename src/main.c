@@ -1,48 +1,43 @@
 #include "gfx/renderer.h"
 #include "types.h"
+#include <engine/scene.h>
 #include <raylib.h>
 #include <raymath.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-Player player = {
-    .position = {22.0, 12.0},
-    .direction = {-1.0, 0.0},
-    .camera_plane = {0.0, 0.66},
-    .move_speed = 5.0,
-    .rot_speed = 3.0,
+void _process_system_input(f64 delta_time);
+
+enum SCENES {
+  SCENE_MAIN_MENU = 0,
+  SCENE_MAIN_MAP,
+  SCENE_COUNT,
+
 };
 
-void _process_input(f64 delta_time);
+enum SCENES current_scene = SCENE_MAIN_MAP;
 
 i32 main(i32 argc, char *argv[]) {
+  Scene scenes[SCENE_COUNT] = {
+      [SCENE_MAIN_MENU] = main_menu_scene,
+      [SCENE_MAIN_MAP] = main_map_scene,
+  };
+
   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Wolf3d");
 
   while (!WindowShouldClose()) {
     const f32 delta_time = GetFrameTime();
     const i32 fps = GetFPS();
 
-    _process_input(delta_time);
+    scenes[current_scene].process(delta_time);
+    _process_system_input(delta_time);
 
     BeginDrawing();
     ClearBackground(BLACK);
 
-    for (i32 screen_x_pos = 0; screen_x_pos < SCREEN_WIDTH; screen_x_pos++) {
-      f64 screen_plane_offset = 2 * screen_x_pos / (f64)SCREEN_WIDTH - 1;
+    scenes[current_scene].draw();
 
-      RayCast ray = {
-          .direction = (vec2){player.direction.x +
-                                  player.camera_plane.x * screen_plane_offset,
-                              player.direction.y +
-                                  player.camera_plane.y * screen_plane_offset},
-          .origin = player.position,
-      };
-
-      Cast_Ray(&ray, &player);
-      Draw_RayHit(&ray, screen_plane_offset);
-    }
     DrawText(TextFormat("FPS: %d", fps), 10, 10, 12, GREEN);
-
     EndDrawing();
   }
 
@@ -51,28 +46,8 @@ i32 main(i32 argc, char *argv[]) {
   return 0;
 }
 
-void _process_input(f64 delta_time) {
-  vec2f move_direction = {0, 0};
-  if (IsKeyDown(KEY_W)) {
-    move_direction.x = 1;
+void _process_system_input(f64 delta_time) {
+  if (IsKeyPressed(KEY_TAB)) {
+    current_scene = (current_scene + 1) % SCENE_COUNT;
   }
-  if (IsKeyDown(KEY_S)) {
-    move_direction.x = -1;
-  }
-  if (IsKeyDown(KEY_A)) {
-    move_direction.y = 1;
-  }
-  if (IsKeyDown(KEY_D)) {
-    move_direction.y = -1;
-  }
-  if (IsKeyDown(KEY_Q) || IsKeyDown(KEY_LEFT)) {
-    Rotate_Player(player.rot_speed, delta_time);
-  }
-  if (IsKeyDown(KEY_E) || IsKeyDown(KEY_RIGHT)) {
-    Rotate_Player(-player.rot_speed, delta_time);
-  }
-
-  move_direction = Vector2Normalize(move_direction);
-
-  Move_Player(move_direction, delta_time);
 }

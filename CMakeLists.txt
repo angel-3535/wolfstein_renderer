@@ -11,6 +11,9 @@ list(APPEND   SRC_FILES
   src/entity/player.c 
   src/gfx/renderer.c 
   src/world/world.c
+  src/engine/scenes/main_map.c
+  src/engine/scenes/main_menu.c
+
 )
 
 add_executable(${PROJECT_NAME} ${SRC_FILES})

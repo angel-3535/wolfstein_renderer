@@ -1,5 +1,18 @@
 #include "renderer.h"
 
+void Draw_Map(i32 TILE_SIZE) {
+  for (i32 y = 0; y < MAP_HEIGHT; y++) {
+    for (i32 x = 0; x < MAP_WIDTH; x++) {
+      if (worldMap[x][y] > 0) {
+        Color color = Get_Wall_Color(worldMap[x][y], 0);
+        const i32 ui_map_size = TILE_SIZE * MAP_WIDTH;
+        DrawRectangle(x * TILE_SIZE + (SCREEN_WIDTH - ui_map_size) / 2,
+                      y * TILE_SIZE + 5, TILE_SIZE, TILE_SIZE, color);
+      }
+    }
+  }
+}
+
 void Draw_RayHit(RayCast *ray, f64 camera_x) {
   if (ray->hit_info.hit == 0)
     return;

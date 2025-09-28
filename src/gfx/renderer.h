@@ -8,7 +8,7 @@
 #include <raylib.h>
 
 #define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 600
+#define SCREEN_HEIGHT 800
 
 typedef struct {
   i32 hit;
@@ -23,6 +23,7 @@ typedef struct {
   HitInfo hit_info;
 } RayCast;
 
+void Draw_Map(i32 TILE_SIZE);
 void Draw_RayHit(RayCast *ray, f64 camera_x);
 void Cast_Ray(RayCast *ray, Player *player);
 Color Get_Wall_Color(int wall_type, int side);
