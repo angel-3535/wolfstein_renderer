@@ -7,8 +7,10 @@
 #include <math.h>
 #include <raylib.h>
 
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 800
+#define SCREEN_WIDTH 640
+#define SCREEN_HEIGHT 480
+#define TEXTURE_WIDTH 64
+#define TEXTURE_HEIGHT 64
 
 typedef struct {
   i32 hit;
@@ -23,9 +25,10 @@ typedef struct {
   HitInfo hit_info;
 } RayCast;
 
+void init_renderer();
 void Draw_Map(i32 TILE_SIZE);
 void Draw_RayHit(RayCast *ray, f64 camera_x);
 void Cast_Ray(RayCast *ray, Player *player);
 Color Get_Wall_Color(int wall_type, int side);
 
-#endif // INCLUDE/Users/angel/dev/personal/wolf3d/src/gfxrendererrenderer.h_
+#endif

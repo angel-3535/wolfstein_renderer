@@ -27,6 +27,10 @@ if (APPLE)
     target_link_libraries(${PROJECT_NAME} "-framework OpenGL")
 endif()
 
-list(APPEND EXTRA_INCLUDES "${PROJECT_SOURCE_DIR}/src")
+list(
+  APPEND EXTRA_INCLUDES 
+  "${PROJECT_SOURCE_DIR}/src"
+)
+
 target_include_directories(${PROJECT_NAME} PRIVATE ${EXTRA_INCLUDES})
 

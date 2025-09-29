@@ -16,4 +16,4 @@ void Move_Player(Vector2 direction, f64 delta_time);
 void Rotate_Player(f64 angle, f64 delta_time);
 
 extern Player player;
-#endif // INCLUDE/Users/angel/dev/personal/wolf3d/srcplayerplayer.h_
+#endif

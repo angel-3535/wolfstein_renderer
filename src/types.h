@@ -3,6 +3,7 @@
 
 #include <raylib.h>
 typedef int i32;
+typedef unsigned int u32;
 typedef float f32;
 typedef double f64;
 
@@ -18,4 +19,4 @@ typedef struct {
   i32 y;
 } ivec2;
 
-#endif // INCLUDE/Users/angel/dev/personal/wolf3d/srctypestypes.h_
+#endif

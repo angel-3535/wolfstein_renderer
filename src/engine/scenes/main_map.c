@@ -42,7 +42,6 @@ void main_map_process_input(f64 delta_time) {
 void main_map_process(f64 delta_time) { main_map_process_input(delta_time); }
 
 void main_map_draw() {
-  // test draw
   DrawText("Main Map Scene", 10, 30, 20, BLUE);
 
   for (i32 screen_x_pos = 0; screen_x_pos < SCREEN_WIDTH; screen_x_pos++) {

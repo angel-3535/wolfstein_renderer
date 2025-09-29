@@ -18,6 +18,7 @@ enum SCENES {
 enum SCENES current_scene = SCENE_MAIN_MAP;
 
 i32 main(i32 argc, char *argv[]) {
+  init_renderer();
   Scene scenes[SCENE_COUNT] = {
       [SCENE_MAIN_MENU] = main_menu_scene,
       [SCENE_MAIN_MAP] = main_map_scene,

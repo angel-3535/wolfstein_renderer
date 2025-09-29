@@ -1,8 +1,35 @@
 #include "renderer.h"
+#include <raylib.h>
+#include <stdio.h>
+
+enum TextureType {
+  TEXTURE_WALL_1 = 0,
+  TEXTURE_WALL_2,
+  TEXTURE_WALL_3,
+  TEXTURE_COUNT
+};
+
+Image textures[TEXTURE_COUNT];
+
+void init_renderer() {
+  // Load textures
+  textures[TEXTURE_WALL_1] = LoadImage("../res/wall_1.bmp");
+  textures[TEXTURE_WALL_2] = LoadImage("../res/wall_2.bmp");
+  textures[TEXTURE_WALL_3] = LoadImage("../res/wall_3.bmp");
+}
 
 void Draw_Map(i32 TILE_SIZE) {
+  const i32 y_offset = 5;
+  const i32 x_offset = (SCREEN_WIDTH - TILE_SIZE * MAP_WIDTH) / 2;
+  const i32 ui_map_size = TILE_SIZE * MAP_WIDTH;
   for (i32 y = 0; y < MAP_HEIGHT; y++) {
+    DrawLine(x_offset, y * TILE_SIZE + y_offset, x_offset + ui_map_size,
+             y * TILE_SIZE + y_offset, GRAY);
     for (i32 x = 0; x < MAP_WIDTH; x++) {
+      if (y == 0) {
+        DrawLine(x * TILE_SIZE + x_offset, y_offset, x * TILE_SIZE + x_offset,
+                 y_offset + ui_map_size, GRAY);
+      }
       if (worldMap[x][y] > 0) {
         Color color = Get_Wall_Color(worldMap[x][y], 0);
         const i32 ui_map_size = TILE_SIZE * MAP_WIDTH;
