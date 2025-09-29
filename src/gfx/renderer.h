@@ -26,8 +26,10 @@ typedef struct {
 } RayCast;
 
 void init_renderer();
+void destroy_renderer();
 void Draw_Map(i32 TILE_SIZE);
-void Draw_RayHit(RayCast *ray, f64 camera_x);
+void Draw_RayHit_To_Buffer(RayCast *ray, f64 camera_x);
+void Draw_Buffer();
 void Cast_Ray(RayCast *ray, Player *player);
 Color Get_Wall_Color(int wall_type, int side);
 

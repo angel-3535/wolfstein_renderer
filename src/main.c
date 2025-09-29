@@ -44,6 +44,7 @@ i32 main(i32 argc, char *argv[]) {
 
   CloseWindow();
 
+  destroy_renderer();
   return 0;
 }
 
