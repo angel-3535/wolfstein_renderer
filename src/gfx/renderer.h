@@ -40,6 +40,8 @@ void Draw_Buffer();
 void Cast_Ray(RayCast *ray, Player *player);
 void Draw_FloorPixel_To_Buffer(ivec2, ivec2, i32, i32);
 void Cast_Floor(FloorCast *floor_cast, Player *player);
+void Draw_Sprite_To_Buffer(Sprite *sprite, vec2 sprite_pos, f64 *z_buffer,
+                           i32 *sprite_order, Player *player);
 Color Get_Wall_Color(int wall_type, int side);
 
 #endif

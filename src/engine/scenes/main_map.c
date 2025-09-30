@@ -5,6 +5,7 @@
 #include <math.h>
 #include <raylib.h>
 #include <raymath.h>
+#include <stdlib.h>
 
 Player player = {
     .position = {22.0, 12.0},
@@ -13,6 +14,20 @@ Player player = {
     .move_speed = 5.0,
     .rot_speed = 3.0,
 };
+
+f64 z_buffer[SCREEN_WIDTH];
+i32 sprite_order[NUM_SPRITES];
+f64 sprite_distance[NUM_SPRITES];
+
+void Sort_Sprites(i32 *order, f64 *dist, i32 ammount);
+
+f64 Distance_Between_Points(vec2 a, vec2 b) {
+  return sqrt((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y));
+}
+
+f64 Fast_Distance_Between_Points(vec2 a, vec2 b) {
+  return (b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y);
+}
 
 void main_map_process_input(f64 delta_time) {
   vec2f move_direction = {0, 0};
@@ -80,13 +95,46 @@ void main_map_draw() {
 
     Cast_Ray(&ray, &player);
     Draw_RayHit_To_Buffer(&ray, screen_x_pos);
+    z_buffer[screen_x_pos] = ray.hit_info.perp_wall_dist;
   }
 
-  Draw_Buffer();
+  for (i32 i = 0; i < NUM_SPRITES; i++) {
+    sprite_order[i] = i;
+    sprite_distance[i] =
+        Fast_Distance_Between_Points(player.position, sprite[i].position);
+  }
+
+  Sort_Sprites(sprite_order, sprite_distance, NUM_SPRITES);
+
+  for (i32 i = 0; i < NUM_SPRITES; i++) {
+
+    vec2 sprite_pos = {
+        sprite[sprite_order[i]].position.x - player.position.x,
+        sprite[sprite_order[i]].position.y - player.position.y,
+    };
+    Draw_Sprite_To_Buffer(&sprite[sprite_order[i]], sprite_pos, z_buffer,
+                          sprite_order, &player);
+  }
   DrawText("Main Map Scene", 10, 30, 20, BLUE);
+  Draw_Buffer();
 }
 
 Scene main_map_scene = {
     .process = main_map_process,
     .draw = main_map_draw,
 };
+
+void Sort_Sprites(i32 *order, f64 *dist, i32 ammount) {
+  for (i32 i = 0; i < ammount - 1; i++) {
+    for (i32 j = i + 1; j < ammount; j++) {
+      if (dist[i] < dist[j]) {
+        f64 temp_dist = dist[i];
+        dist[i] = dist[j];
+        dist[j] = temp_dist;
+        i32 temp_order = order[i];
+        order[i] = order[j];
+        order[j] = temp_order;
+      }
+    }
+  }
+}

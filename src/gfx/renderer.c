@@ -2,6 +2,7 @@
 #include "types.h"
 #include <raylib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 enum TextureType {
   TEXTURE_WALL_1 = 0,
@@ -14,6 +15,14 @@ enum TextureType {
   TEXTURE_COUNT
 };
 
+enum SpriteType {
+  SPRITE_BARREL = 0,
+  SPRITE_PILLAR,
+  SPRITE_LIGHT,
+  SPRITE_COUNT
+};
+
+Image sprite_textures[SPRITE_COUNT];
 Image textures[TEXTURE_COUNT];
 Image buffer;
 Texture2D gpu_buffer;
@@ -26,6 +35,18 @@ void init_renderer() {
         texture_atlas,
         (Rectangle){i * TEXTURE_WIDTH, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT});
   }
+  // Image sprite_atlas = LoadImage("../res/wolfsprites.bmp");
+
+  for (i32 i = 0; i < SPRITE_COUNT; i++) {
+    sprite_textures[i] = ImageFromImage(
+        texture_atlas,
+        (Rectangle){TEXTURE_COUNT * TEXTURE_WIDTH + i * TEXTURE_WIDTH, 0,
+                    TEXTURE_WIDTH, TEXTURE_HEIGHT});
+  }
+
+  UnloadImage(texture_atlas);
+  // UnloadImage(sprite_atlas);
+
   printf("Loaded %d textures\n", TEXTURE_COUNT);
 
   buffer = GenImageColor(SCREEN_WIDTH, SCREEN_HEIGHT, BLACK);
@@ -235,5 +256,57 @@ void Cast_Floor(FloorCast *floor_cast, Player *player) {
     floor.y += floor_step.y;
 
     Draw_FloorPixel_To_Buffer(cell, tx_cord, x, floor_cast->y);
+  }
+}
+
+void Draw_Sprite_To_Buffer(Sprite *sprite, vec2 sprite_pos, f64 *z_buffer,
+                           i32 *sprite_order, Player *player) {
+
+  f64 inv_det = 1.0 / (player->camera_plane.x * player->direction.y -
+                       player->direction.x * player->camera_plane.y);
+
+  vec2 transform = {
+      inv_det * (player->direction.y * sprite_pos.x -
+                 player->direction.x * sprite_pos.y),
+      inv_det * (-player->camera_plane.y * sprite_pos.x +
+                 player->camera_plane.x * sprite_pos.y),
+  };
+
+  i32 sprite_screen_x =
+      (i32)((SCREEN_WIDTH / 2) * (1 + transform.x / transform.y));
+
+  i32 sprite_height = abs((i32)(SCREEN_HEIGHT / (transform.y)));
+
+  i32 draw_start_y = -sprite_height / 2 + SCREEN_HEIGHT / 2;
+  if (draw_start_y < 0)
+    draw_start_y = 0;
+  i32 draw_end_y = sprite_height / 2 + SCREEN_HEIGHT / 2;
+  if (draw_end_y >= SCREEN_HEIGHT)
+    draw_end_y = SCREEN_HEIGHT - 1;
+
+  i32 sprite_width = abs((i32)(SCREEN_HEIGHT / (transform.y)));
+  i32 draw_start_x = -sprite_width / 2 + sprite_screen_x;
+  if (draw_start_x < 0)
+    draw_start_x = 0;
+  i32 draw_end_x = sprite_width / 2 + sprite_screen_x;
+  if (draw_end_x >= SCREEN_WIDTH)
+    draw_end_x = SCREEN_WIDTH - 1;
+
+  for (i32 stripe = draw_start_x; stripe < draw_end_x; stripe++) {
+    i32 tex_x = (i32)(256 * (stripe - (-sprite_width / 2 + sprite_screen_x)) *
+                      TEXTURE_WIDTH / sprite_width) /
+                256;
+    if (transform.y > 0 && stripe > 0 && stripe < SCREEN_WIDTH &&
+        transform.y < z_buffer[stripe]) {
+      for (i32 y = draw_start_y; y < draw_end_y; y++) {
+        i32 d = (y) * 256 - SCREEN_HEIGHT * 128 + sprite_height * 128;
+        i32 tex_y = ((d * TEXTURE_HEIGHT) / sprite_height) / 256;
+        Color color =
+            GetImageColor(sprite_textures[sprite->texture], tex_x, tex_y);
+        if (color.a > 128) {
+          ImageDrawPixel(&buffer, stripe, y, color);
+        }
+      }
+    }
   }
 }
