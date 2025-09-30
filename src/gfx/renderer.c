@@ -203,3 +203,37 @@ Color Get_Wall_Color(int wall_type, int side) {
 
   return color;
 }
+
+void Draw_FloorPixel_To_Buffer(ivec2 cell, ivec2 text_cord, i32 x, i32 y) {
+  Color floor_color = GetImageColor(textures[3], text_cord.x, text_cord.y);
+  Color ceiling_color = GetImageColor(textures[6], text_cord.x, text_cord.y);
+
+  ImageDrawPixel(&buffer, x, y, floor_color);
+  ImageDrawPixel(&buffer, x, SCREEN_HEIGHT - y - 1, ceiling_color);
+}
+
+void Cast_Floor(FloorCast *floor_cast, Player *player) {
+  f64 pos_z = 0.5 * SCREEN_HEIGHT;
+
+  f64 row_distance = pos_z / floor_cast->position;
+  vec2 floor_step = {
+      row_distance * (floor_cast->direction1.x - floor_cast->direction0.x) /
+          SCREEN_WIDTH,
+      row_distance * (floor_cast->direction1.y - floor_cast->direction0.y) /
+          SCREEN_WIDTH};
+  vec2 floor = {player->position.x + row_distance * floor_cast->direction0.x,
+                player->position.y + row_distance * floor_cast->direction0.y};
+
+  for (i32 x = 0; x < SCREEN_WIDTH; x++) {
+    ivec2 cell = {(i32)(floor.x), (i32)(floor.y)};
+
+    ivec2 tx_cord = {
+        (i32)(TEXTURE_WIDTH * (floor.x - cell.x)) & (TEXTURE_WIDTH - 1),
+        (i32)(TEXTURE_HEIGHT * (floor.y - cell.y)) & (TEXTURE_HEIGHT - 1)};
+
+    floor.x += floor_step.x;
+    floor.y += floor_step.y;
+
+    Draw_FloorPixel_To_Buffer(cell, tx_cord, x, floor_cast->y);
+  }
+}

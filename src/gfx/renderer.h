@@ -25,12 +25,21 @@ typedef struct {
   HitInfo hit_info;
 } RayCast;
 
+typedef struct {
+  i32 position;
+  vec2 direction0;
+  vec2 direction1;
+  i32 y;
+} FloorCast;
+
 void init_renderer();
 void destroy_renderer();
 void Draw_Map(i32 TILE_SIZE);
 void Draw_RayHit_To_Buffer(RayCast *ray, f64 camera_x);
 void Draw_Buffer();
 void Cast_Ray(RayCast *ray, Player *player);
+void Draw_FloorPixel_To_Buffer(ivec2, ivec2, i32, i32);
+void Cast_Floor(FloorCast *floor_cast, Player *player);
 Color Get_Wall_Color(int wall_type, int side);
 
 #endif

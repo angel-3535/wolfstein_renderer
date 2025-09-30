@@ -2,6 +2,7 @@
 #include <engine/scene.h>
 
 #include <entity/player.h>
+#include <math.h>
 #include <raylib.h>
 #include <raymath.h>
 
@@ -43,6 +44,29 @@ void main_map_process(f64 delta_time) { main_map_process_input(delta_time); }
 
 void main_map_draw() {
 
+  // Floor casting
+  for (i32 y = 0; y < SCREEN_HEIGHT; y++) {
+
+    FloorCast floor_cast = {
+        .y = y,
+        .direction0 =
+            {
+                player.direction.x - player.camera_plane.x,
+                player.direction.y - player.camera_plane.y,
+            },
+        .direction1 =
+            {
+                player.direction.x + player.camera_plane.x,
+                player.direction.y + player.camera_plane.y,
+            },
+        .position = y - SCREEN_HEIGHT / 2,
+
+    };
+
+    Cast_Floor(&floor_cast, &player);
+  }
+
+  // Ray casting for walls
   for (i32 screen_x_pos = 0; screen_x_pos < SCREEN_WIDTH; screen_x_pos++) {
     f64 screen_plane_offset = 2 * screen_x_pos / (f64)SCREEN_WIDTH - 1;
 
@@ -57,6 +81,7 @@ void main_map_draw() {
     Cast_Ray(&ray, &player);
     Draw_RayHit_To_Buffer(&ray, screen_x_pos);
   }
+
   Draw_Buffer();
   DrawText("Main Map Scene", 10, 30, 20, BLUE);
 }
