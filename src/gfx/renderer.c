@@ -35,17 +35,16 @@ void init_renderer() {
         texture_atlas,
         (Rectangle){i * TEXTURE_WIDTH, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT});
   }
-  // Image sprite_atlas = LoadImage("../res/wolfsprites.bmp");
+  Image sprite_atlas = LoadImage("../res/wolfsprites.png");
 
   for (i32 i = 0; i < SPRITE_COUNT; i++) {
     sprite_textures[i] = ImageFromImage(
-        texture_atlas,
-        (Rectangle){TEXTURE_COUNT * TEXTURE_WIDTH + i * TEXTURE_WIDTH, 0,
-                    TEXTURE_WIDTH, TEXTURE_HEIGHT});
+        sprite_atlas,
+        (Rectangle){i * TEXTURE_WIDTH, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT});
   }
 
   UnloadImage(texture_atlas);
-  // UnloadImage(sprite_atlas);
+  UnloadImage(sprite_atlas);
 
   printf("Loaded %d textures\n", TEXTURE_COUNT);
 
@@ -303,7 +302,7 @@ void Draw_Sprite_To_Buffer(Sprite *sprite, vec2 sprite_pos, f64 *z_buffer,
         i32 tex_y = ((d * TEXTURE_HEIGHT) / sprite_height) / 256;
         Color color =
             GetImageColor(sprite_textures[sprite->texture], tex_x, tex_y);
-        if (color.a > 128) {
+        if (color.r > 0) {
           ImageDrawPixel(&buffer, stripe, y, color);
         }
       }
