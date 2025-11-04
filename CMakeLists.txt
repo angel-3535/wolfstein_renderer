@@ -5,6 +5,14 @@ find_package(raylib 3.0 REQUIRED) # Requires at least version 3.0
 
 set(CMAKE_C_STANDARD 11) # Requires C11 standard
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  message(STATUS "Debug build")
+  set(CMAKE_C_FLAGS_DEBUG "-g -O0 -DDEBUG")
+endif()
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+  message(STATUS "Release build")
+  set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
+endif()
 
 list(APPEND   SRC_FILES 
   src/main.c 
