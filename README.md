@@ -1,5 +1,7 @@
 # Wolf3D
 
+![Wolf3D Screenshot](wolf3d.png)
+
 A Wolf3D-style raycasting engine written in C using the Raylib graphics library. This project implements a classic pseudo-3D rendering technique popularized by games like Wolfenstein 3D.
 
 ## Using
